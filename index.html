@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        td{
+            height: 95px;
+            width: 95px;
+            text-align: center;
+            font-size: 50px;
+        }
+        
+        #first{
+            position: inline-block;
+        }
+
+        #second{
+            position: inline-block;
+        }
+
+    </style>
+</head>
+<body>
+    
+<div id="first">
+    <h1 id="winAnnouncment"> </h1>
+
+    <canvas id="canvas" width="300" height="300" style="position: absolute;"></canvas> </canvas>
+
+    <table id="tb" style="position: relative;">
+        <tr>
+            <td id="0" style="border-right: 1px solid black; border-bottom: 1px solid black;" onclick="turn(0)"></td>
+            <td id="1" style="border-bottom: 1px solid black;" onclick="turn(1)"></td>
+            <td id="2" style="border-left: 1px solid black; border-bottom: 1px solid black;" onclick="turn(2)"></td>
+        </tr>
+        <tr>
+            <td id="3" style="border-right: 1px solid black;" onclick="turn(3)"></td>
+            <td id="4" onclick="turn(4)"></td>
+            <td id="5" style="border-left: 1px solid black;" onclick="turn(5)"></td>
+        </tr>
+        <tr>
+            <td id="6" style="border-right: 1px solid black; border-top: 1px solid black;" onclick="turn(6)"></td>
+            <td id="7" style="border-top: 1px solid black;" onclick="turn(7)"></td>
+            <td id="8" style="border-left: 1px solid black; border-top: 1px solid black;" onclick="turn(8)"></td>
+        </tr>
+    </table>
+</div>
+
+<div id="second">
+    <button id="resetBoard" onclick="resetBoard()">reset board</button>
+    <button id="resetGame" onclick="resetGame()">reset game</button>
+
+    <h2> x won <span id="xSpan">0</span> times</h2>
+    <h2> o won <span id="oSpan">0</span> times</h2>
+</div>
+
+
+
+<script>    
+    
+
+    //-----------------------------HTML ELEMENTS---------------------
+    var winAnnouncment = document.getElementById("winAnnouncment");
+    winAnnouncment.innerHTML = "-";
+
+    var canvas = document.getElementById("canvas");
+    var canvasContext = canvas.getContext("2d");
+    // canvasContext.moveTo(0, 0);
+    //canvasContext.lineTo(300, 300);
+    //canvasContext.stroke();
+    
+
+    var xSpan = document.getElementById("xSpan");
+    var oSpan = document.getElementById("oSpan");
+    var xCounter = 0;
+    var oCounter = 0;
+    //------------------------------table cells DOM-----------------
+    var cells = new Array(9);
+    for (var i = 0; i < 9; i++){
+        cells[i] = document.getElementById(i.toString());
+    }
+    //-----------------------------board repreaentation-------------------------------
+    var board = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+    ]
+    var turns = 0;
+    
+    function turn(num){
+        if (cells[num].innerHTML != null){
+            
+        }
+        if(turns % 2 == 0){
+            cells[num].innerHTML = "X";
+            cells[num].style.pointerEvents = "none";
+            board[Math.floor(num / 3)][num % 3] = "X";
+            checkWin("X");
+        }
+        else{
+            cells[num].innerHTML = "O";
+            cells[num].style.pointerEvents = "none";
+            board[Math.floor(num / 3)][num % 3] = "O"; 
+            checkWin("O");
+        }
+        if(turns == 8 && !checkWin()){
+            winAnnouncment.innerHTML = "tie baby";
+        }
+        turns ++;
+    }
+//-------------------------------------win checker---------------------------------
+    function checkWin(char){
+        if(checkHorizontal(char) || checkVertical(char) || checkDiagonal(char)){
+            winAnnouncment.innerHTML = char + " wins"
+            if(char=="X"){
+                xCounter ++;
+                xSpan.innerHTML = xCounter;
+            }
+            else{
+                oCounter ++;
+                oSpan.innerHTML = oCounter;
+            }
+            endGame();
+            return true;
+        }
+        return false;
+    }
+
+    function checkHorizontal(char){
+        for(var i = 0; i < 3; i++){
+            if(board[i][0] == char && board[i][1] == char && board[i][2] == char){
+                canvasContext.beginPath();
+                canvasContext.moveTo(0, 100*i+50);
+                canvasContext.lineTo(300,100*i+50);
+                canvasContext.stroke();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function checkVertical(char){
+        for(var i = 0; i < 3; i++){
+            if(board[0][i] == char && board[1][i] == char && board[2][i] == char){
+                canvasContext.beginPath();
+                canvasContext.moveTo(100 * i + 50, 0);
+                canvasContext.lineTo(100 * i + 50, 300);
+                canvasContext.stroke();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function checkDiagonal(char){
+        if(board[0][0] == char && board[1][1] == char && board[2][2] == char){
+            canvasContext.beginPath();
+            canvasContext.moveTo(0, 0);
+            canvasContext.lineTo(300, 300);
+            canvasContext.stroke();
+            return true;
+        }
+        if(board[2][0] == char && board[1][1] == char && board[0][2] == char){
+            canvasContext.beginPath();
+            canvasContext.moveTo(300, 0);
+            canvasContext.lineTo(0, 300);
+            canvasContext.stroke();
+            return true;
+        }
+        return false;
+    }
+
+    function resetBoard(){
+        for ( var i = 0; i < 9; i++){
+            cells[i].innerHTML = "";
+            cells[i].style.pointerEvents = "auto";
+            board[Math.floor(i / 3)][i % 3] = null;
+            winAnnouncment.innerHTML ="-";
+        }
+        turns = 0;
+        canvasContext.clearRect(0, 0, 300, 300);
+    }
+
+    function resetGame (){
+        resetBoard();
+        xSpan.innerHTML = 0;
+        oSpan.innerHTML = 0;
+        xCounter = 0;
+        oCounter = 0;
+        canvasContext.clearRect(0, 0, 300, 300);
+
+
+    }
+
+
+
+    function endGame(){
+        for ( var i = 0; i < 9; i++){
+            cells[i].style.pointerEvents = "none";
+        }
+    }
+
+</script>
+
+</body>
+</html> 
